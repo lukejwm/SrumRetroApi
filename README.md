@@ -10,7 +10,7 @@ From [Spring Initializr](https://start.spring.io/), this project contains the fo
 - H2 Database 
 - Lombok 
 
-To Include from [Maven Repository](https://mvnrepository.com/):
+From [Maven Repository](https://mvnrepository.com/) the project includes:
 - Mockito 
 - JUnit 5 (Jupiter)
 - Apache Commons Logging
