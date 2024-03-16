@@ -23,7 +23,7 @@ public class RetrospectiveService {
     }
 
     public Optional<Page<Retrospective>> getAllRetrospectives(Pageable pageable) {
-        logger.info("Attempting to retrieve all retrospectives with pagination");
+        logger.debug("Attempting to retrieve all retrospectives with pagination");
         Optional<Page<Retrospective>> result = retrospectiveRepository.getAllRetrospectives(pageable);
         result.ifPresent(page -> logger.info("Retrieved " + page.getNumberOfElements() + " retrospectives"));
         return result;

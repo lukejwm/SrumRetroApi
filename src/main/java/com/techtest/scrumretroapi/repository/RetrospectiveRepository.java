@@ -1,6 +1,7 @@
 package com.techtest.scrumretroapi.repository;
 
 import com.techtest.scrumretroapi.entity.Retrospective;
+import com.techtest.scrumretroapi.entity.feedback.Feedback;
 import com.techtest.scrumretroapi.entity.feedback.FeedbackItem;
 import com.techtest.scrumretroapi.utils.LoggingUtil;
 import org.apache.commons.logging.Log;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +22,7 @@ public class RetrospectiveRepository {
     // integrate with database
 
     private final List<Retrospective> retrospectiveList = new ArrayList<>();
-    private final Log log = LoggingUtil.getLogger(RetrospectiveRepository.class);
+    private final Log logger = LoggingUtil.getLogger(RetrospectiveRepository.class);
 
     public RetrospectiveRepository() {
         List<String> participants1 = new ArrayList<>(List.of("Fred", "Tom", "Joan"));
@@ -50,31 +52,113 @@ public class RetrospectiveRepository {
 
     public Optional<Page<Retrospective>> getAllRetrospectives(Pageable pageable) {
         if (retrospectiveList.isEmpty()) {
+            logger.debug("No retrospectives available. Returning empty optional.");
             return Optional.empty();
         } else {
             int start = (int) pageable.getOffset();
             int end = Math.min((start + pageable.getPageSize()), retrospectiveList.size());
             List<Retrospective> content = retrospectiveList.subList(start, end);
-            return Optional.of(new PageImpl<>(content, pageable, retrospectiveList.size()));
+            Page<Retrospective> page = new PageImpl<>(content, pageable, retrospectiveList.size());
+            logger.debug("Retrieved " + content.size() + " retrospectives for page: " + pageable.getPageNumber() + ", size: " + pageable.getPageSize());
+            return Optional.of(page);
         }
     }
 
     public Optional<List<Retrospective>> getRetrospectivesByDate(LocalDate date) {
         List<Retrospective> filteredList = retrospectiveList.stream().filter(retrospective -> retrospective.getDate().equals(date)).toList();
-        return filteredList.isEmpty() ? Optional.empty() : Optional.of(filteredList);
+        if (filteredList.isEmpty()) {
+            logger.debug("No retrospectives found for date: " + date);
+            return Optional.empty();
+        } else {
+            logger.debug("Retrieved " + filteredList.size() + " retrospectives for date: " + date);
+            return Optional.of(filteredList);
+        }
     }
 
     public void createNewRetrospective(Retrospective retrospective) {
+        logger.debug("Adding new retrospective: " + retrospective);
         retrospectiveList.add(retrospective);
+        logger.info("New retrospective added successfully: " + retrospective);
     }
 
     public boolean existsByName(String name) {
-        return true;
+        boolean exists = retrospectiveList.stream().anyMatch(r -> r.getName().equals(name));
+        logger.debug("Checking existence of retrospective with name '" + name + "': " + exists);
+        return exists;
     }
 
     public void createNewFeedbackForRetrospective(String retrospectiveName, FeedbackItem newFeedbackItem) {
+        retrospectiveList.stream()
+                .filter(r -> r.getName().equals(retrospectiveName))
+                .findFirst()
+                .ifPresent(retrospective -> {
+                    // Log the start of the method
+                    logger.info("Attempting to create new feedback for retrospective: " + retrospectiveName);
+
+                    // Get the existing feedback list
+                    List<Feedback> feedbackList = new ArrayList<>(retrospective.getFeedback());
+
+                    // Log the size of the existing feedback list
+                    logger.debug("Existing feedback list size: " + feedbackList.size());
+
+                    // Find the new id
+                    int newItemId = feedbackList.size() + 1;
+
+                    // Log the new item id
+                    logger.debug("New item id: " + newItemId);
+
+                    // Add the new feedback item with the new id
+                    feedbackList.add(new Feedback(newItemId, newFeedbackItem));
+
+                    // Log the addition of the new feedback item
+                    logger.info("New feedback item added: " + newFeedbackItem);
+
+                    // Update the retrospective with the new feedback list
+                    retrospective.setFeedback(feedbackList);
+
+                    // Log the end of the method
+                    logger.info("New feedback added successfully for retrospective: " + retrospectiveName);
+                });
     }
 
     public void updateFeedbackForRetrospective(String retrospectiveName, int itemId, FeedbackItem newFeedbackItem) {
+        retrospectiveList.stream()
+                .filter(r -> r.getName().equals(retrospectiveName))
+                .findFirst()
+                .ifPresent(retrospective -> {
+                    // Log the start of the method
+                    logger.info("Attempting to update feedback for retrospective: " + retrospectiveName);
+
+                    // Get the existing feedback list
+                    List<Feedback> feedbackList = new ArrayList<>(retrospective.getFeedback());
+
+                    // Log the size of the existing feedback list
+                    logger.debug("Existing feedback list size: " + feedbackList.size());
+
+                    // Find the feedback item by its ID
+                    Optional<Feedback> feedbackToUpdate = feedbackList.stream()
+                            .filter(feedback -> feedback.getItem() == itemId)
+                            .findFirst();
+
+                    // Log if the feedback item is found or not
+                    if (feedbackToUpdate.isPresent()) {
+                        logger.debug("Feedback item found with id: " + itemId);
+                    } else {
+                        logger.debug("Feedback item not found with id: " + itemId);
+                    }
+
+                    // Update the feedback item if found
+                    feedbackToUpdate.ifPresent(feedback -> {
+                        // Log the update of the feedback item
+                        logger.info("Updating feedback item with id: " + itemId);
+                        feedback.setItemBody(newFeedbackItem);
+                    });
+
+                    // Update the retrospective with the modified feedback list
+                    retrospective.setFeedback(feedbackList);
+
+                    // Log the end of the method
+                    logger.info("Feedback updated successfully for retrospective: " + retrospectiveName);
+                });
     }
 }
