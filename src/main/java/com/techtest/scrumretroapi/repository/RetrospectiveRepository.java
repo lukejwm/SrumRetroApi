@@ -2,13 +2,17 @@ package com.techtest.scrumretroapi.repository;
 
 import com.techtest.scrumretroapi.entity.Retrospective;
 import com.techtest.scrumretroapi.entity.feedback.FeedbackItem;
+import com.techtest.scrumretroapi.utils.LoggingUtil;
+import org.apache.commons.logging.Log;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 public class RetrospectiveRepository {
@@ -16,6 +20,7 @@ public class RetrospectiveRepository {
     // integrate with database
 
     private final List<Retrospective> retrospectiveList = new ArrayList<>();
+    private final Log log = LoggingUtil.getLogger(RetrospectiveRepository.class);
 
     public RetrospectiveRepository() {
         List<String> participants1 = new ArrayList<>(List.of("Fred", "Tom", "Joan"));
@@ -43,8 +48,15 @@ public class RetrospectiveRepository {
                 "Retrospective 10", "Some other retrospective", LocalDate.now(), participants1, new ArrayList<>()));
     }
 
-    public Optional<List<Retrospective>> getAllRetrospectives() {
-        return retrospectiveList.isEmpty() ? Optional.empty() : Optional.of(retrospectiveList);
+    public Optional<Page<Retrospective>> getAllRetrospectives(Pageable pageable) {
+        if (retrospectiveList.isEmpty()) {
+            return Optional.empty();
+        } else {
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), retrospectiveList.size());
+            List<Retrospective> content = retrospectiveList.subList(start, end);
+            return Optional.of(new PageImpl<>(content, pageable, retrospectiveList.size()));
+        }
     }
 
     public Optional<List<Retrospective>> getRetrospectivesByDate(LocalDate date) {
@@ -56,7 +68,13 @@ public class RetrospectiveRepository {
         retrospectiveList.add(retrospective);
     }
 
-    public void createNewFeedbackForRetrospective(String retrospectiveName, FeedbackItem newFeedbackItem) {}
+    public boolean existsByName(String name) {
+        return true;
+    }
 
-    public void updateFeedbackForRetrospective (String retrospectiveName, int itemId, FeedbackItem newFeedbackItem) {}
+    public void createNewFeedbackForRetrospective(String retrospectiveName, FeedbackItem newFeedbackItem) {
+    }
+
+    public void updateFeedbackForRetrospective(String retrospectiveName, int itemId, FeedbackItem newFeedbackItem) {
+    }
 }

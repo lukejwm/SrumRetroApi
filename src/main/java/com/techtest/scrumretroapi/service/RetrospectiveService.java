@@ -3,6 +3,10 @@ package com.techtest.scrumretroapi.service;
 import com.techtest.scrumretroapi.entity.Retrospective;
 import com.techtest.scrumretroapi.entity.feedback.FeedbackItem;
 import com.techtest.scrumretroapi.repository.RetrospectiveRepository;
+import com.techtest.scrumretroapi.utils.LoggingUtil;
+import org.apache.commons.logging.Log;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,13 +16,14 @@ import java.util.Optional;
 @Service
 public class RetrospectiveService {
     private final RetrospectiveRepository retrospectiveRepository;
+    private final Log logger = LoggingUtil.getLogger(RetrospectiveService.class);
 
     public RetrospectiveService(RetrospectiveRepository retrospectiveRepository) {
         this.retrospectiveRepository = retrospectiveRepository;
     }
 
-    public Optional<List<Retrospective>> getAllRetrospectives() {
-        return retrospectiveRepository.getAllRetrospectives();
+    public Optional<Page<Retrospective>> getAllRetrospectives(Pageable pageable) {
+        return retrospectiveRepository.getAllRetrospectives(pageable);
     }
 
     public Optional<List<Retrospective>> getRetrospectivesByDate(LocalDate date) {
@@ -27,21 +32,14 @@ public class RetrospectiveService {
     }
 
     public void createNewRetrospective(Retrospective retrospective) throws Exception {
-        // check if the retrospective name already exists before passing to the repository
-        Optional<List<Retrospective>> retrospectiveList = retrospectiveRepository.getAllRetrospectives();
+        String nameToCheck = retrospective.getName();
 
-        if (retrospectiveList.isPresent()) {
-            List<Retrospective> retrospectives = retrospectiveList.get();
+        // check if the name already exists in the repository
+        boolean nameAlreadyExists = retrospectiveRepository.existsByName(nameToCheck);
 
-            // Check if any retrospective has the same name as the one being added
-            String nameToCheck = retrospective.getName();
-            boolean nameAlreadyExists = retrospectives.stream().anyMatch(r -> r.getName().equals(nameToCheck));
-
-            if (nameAlreadyExists) {
-                throw new Exception(String.format("The retrospective name '%s' has already been added!", nameToCheck));
-            } else {
-                retrospectiveRepository.createNewRetrospective(retrospective);
-            }
+        if (nameAlreadyExists) {
+            // TODO: log this!
+            throw new Exception(String.format("The retrospective name '%s' has already been added!", nameToCheck));
         } else {
             retrospectiveRepository.createNewRetrospective(retrospective);
         }

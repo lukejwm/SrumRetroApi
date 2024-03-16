@@ -9,14 +9,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class RetrospectiveServiceTest {
@@ -40,19 +42,21 @@ public class RetrospectiveServiceTest {
 
     @Test
     void testGetAllRetrospectives() {
-        // Mock the repository method
+        // Mock the repository method to return a page of retrospectives
         List<Retrospective> retrospectives = new ArrayList<>();
-        when(retrospectiveRepository.getAllRetrospectives()).thenReturn(Optional.of(retrospectives));
+        Page<Retrospective> page = new PageImpl<>(retrospectives);
+        when(retrospectiveRepository.getAllRetrospectives(any(Pageable.class))).thenReturn(Optional.of(page));
 
         // Call the service method
-        Optional<List<Retrospective>> result = retrospectiveService.getAllRetrospectives();
+        Optional<Page<Retrospective>> result = retrospectiveService.getAllRetrospectives(Pageable.unpaged());
 
-        // Verify the repository method was called
-        verify(retrospectiveRepository, times(1)).getAllRetrospectives();
+        // Verify the repository method was called with the correct Pageable parameter
+        verify(retrospectiveRepository, times(1)).getAllRetrospectives(any(Pageable.class));
 
         // Verify the result
-        assert result.isPresent();
-        assertSame(retrospectives, result.get());
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+        assertEquals(retrospectives, result.get().getContent());
     }
 
     @Test

@@ -9,14 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -51,29 +52,34 @@ public class RetrospectiveApiControllerTest {
             new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>())
         );
 
-        when(retrospectiveService.getAllRetrospectives()).thenReturn(Optional.of(retrospectives));
+        // factor in pagination
+        Page<Retrospective> page = new PageImpl<>(retrospectives);
+
+        when(retrospectiveService.getAllRetrospectives(any(Pageable.class))).thenReturn(Optional.of(page));
 
         // Call the controller method
-        ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectives();
+        ResponseEntity<Page<Retrospective>> result = retrospectiveApiController.getAllRetrospectives(0, 10); // Example: First page with 10 items
 
         // Verifying the result and that the service is called
-        assertEquals(OK, result.getStatusCode());
-        assertEquals(retrospectives, result.getBody()); // Verifying the returned retrospectives
-        verify(retrospectiveService, times(1)).getAllRetrospectives();
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(retrospectives, Objects.requireNonNull(result.getBody()).getContent()); // Verifying the returned retrospectives
+        verify(retrospectiveService, times(1)).getAllRetrospectives(any(Pageable.class));
     }
 
 
     @Test
     void testGetAllRetrospectivesFail() {
-        // Mocking the service method to return an empty Optional
-        when(retrospectiveService.getAllRetrospectives()).thenReturn(Optional.empty());
+        // FIXME: call the pagination method BUT ensure it comes back with nothing!
+        // Mocking the service method to return an empty Page
+        Page<Retrospective> page = new PageImpl<>(Collections.emptyList());
+        when(retrospectiveService.getAllRetrospectives(any(Pageable.class))).thenReturn(Optional.of(page));
 
         // Call the controller method
-        ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectives();
+        ResponseEntity<Page<Retrospective>> result = retrospectiveApiController.getAllRetrospectives(0, 10); // Example: First page with 10 items
 
         // Verifying the result and that the service is called
-        assertEquals(NOT_FOUND, result.getStatusCode());
-        verify(retrospectiveService, times(1)).getAllRetrospectives();
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        verify(retrospectiveService, times(1)).getAllRetrospectives(any(Pageable.class));
     }
 
     @Test
