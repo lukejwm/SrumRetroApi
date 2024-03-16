@@ -19,8 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
 
 public class RetrospectiveApiControllerTest {
     private AutoCloseable closeable;
@@ -42,34 +43,65 @@ public class RetrospectiveApiControllerTest {
     }
 
     @Test
-    void testGetAllRetrospectives() {
-        // Mocking the service method
-        List<Retrospective> retrospectives = new ArrayList<>();
+    void testGetAllRetrospectivesSuccess() {
+        // Mocking the service method to return a non-empty Optional with some retrospectives
+        List<Retrospective> retrospectives = List.of(
+            new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>()),
+            new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>())
+        );
+
         when(retrospectiveService.getAllRetrospectives()).thenReturn(Optional.of(retrospectives));
 
         // Call the controller method
-        Optional<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectives();
+        ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectives();
 
         // Verifying the result and that the service is called
-        assertEquals(retrospectives, result.orElse(null));
+        assertEquals(OK, result.getStatusCode());
+        assertEquals(retrospectives, result.getBody()); // Verifying the returned retrospectives
+        verify(retrospectiveService, times(1)).getAllRetrospectives();
+    }
+
+
+    @Test
+    void testGetAllRetrospectivesFail() {
+        // Mocking the service method to return an empty Optional
+        when(retrospectiveService.getAllRetrospectives()).thenReturn(Optional.empty());
+
+        // Call the controller method
+        ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectives();
+
+        // Verifying the result and that the service is called
+        assertEquals(NOT_FOUND, result.getStatusCode());
         verify(retrospectiveService, times(1)).getAllRetrospectives();
     }
 
     @Test
-    public void testGetAllRetrospectivesByDate() {
+    void testGetAllRetrospectivesByDateSuccess() {
         // Mock the service method
         LocalDate date = LocalDate.now();
         List<Retrospective> retrospectives = Collections.singletonList(new Retrospective());
         when(retrospectiveService.getRetrospectivesByDate(date)).thenReturn(Optional.of(retrospectives));
 
         // Call the controller method
-        Optional<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectivesByDate(date);
+        ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectivesByDate(date);
 
-        // Verify the service method was called
+        // Verifying the result and that the service is called
+        assertEquals(OK, result.getStatusCode());
         verify(retrospectiveService, times(1)).getRetrospectivesByDate(date);
+    }
 
-        // Verify the result
-        assertTrue(result.isPresent());
+    @Test
+    void testGetAllRetrospectivesByDateFail() {
+        // Mock the service method
+        LocalDate date = LocalDate.now();
+        when(retrospectiveService.getRetrospectivesByDate(date)).thenReturn(Optional.empty());
+
+        // Call the controller method
+        ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectivesByDate(date);
+
+        // Verifying the result and that the service is called
+        assertEquals(NOT_FOUND, result.getStatusCode());
+        verify(retrospectiveService, times(1)).getRetrospectivesByDate(date);
     }
 
     @Test

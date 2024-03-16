@@ -47,8 +47,9 @@ public class RetrospectiveApiController {
             @ApiResponse(responseCode = "500", description = "Failed to fetch retrospectives from server", content = @Content)
     })
     @GetMapping("/all")
-    public Optional<List<Retrospective>> getAllRetrospectives() {
-        return retrospectiveService.getAllRetrospectives();
+    public ResponseEntity<List<Retrospective>> getAllRetrospectives() {
+        Optional<List<Retrospective>> retrospectives = retrospectiveService.getAllRetrospectives();
+        return retrospectives.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Get all retrospectives by date")
@@ -58,10 +59,12 @@ public class RetrospectiveApiController {
             @ApiResponse(responseCode = "404", description = "No retrospective data found for given date", content = @Content),
             @ApiResponse(responseCode = "500", description = "Failed to fetch retrospectives from server", content = @Content)
     })
-    @GetMapping("/by-date/{date}")
-    public Optional<List<Retrospective>> getAllRetrospectivesByDate(@Parameter(description = "Date to filter retrospectives")
-                                                                    @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return retrospectiveService.getRetrospectivesByDate(date);
+    @GetMapping("/filter")
+    public ResponseEntity<List<Retrospective>> getAllRetrospectivesByDate(@Parameter(description = "Date to filter retrospectives by")
+                                                                    @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        Optional<List<Retrospective>> retrospectives = retrospectiveService.getRetrospectivesByDate(date);
+        return retrospectives.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Create a new retrospective",
