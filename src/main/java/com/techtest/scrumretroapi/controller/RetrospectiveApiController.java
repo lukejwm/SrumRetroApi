@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.logging.Log;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -39,12 +40,11 @@ import java.util.Optional;
 @RequestMapping("/retrospective")
 @Tag(name = "Scrum Retrospective API")
 public class RetrospectiveApiController {
-    private final RetrospectiveService retrospectiveService;
-    private final Log logger = LoggingUtil.getLogger(RetrospectiveApiController.class);
 
-    public RetrospectiveApiController(RetrospectiveService retrospectiveService) {
-        this.retrospectiveService = retrospectiveService;
-    }
+    @Autowired
+    private RetrospectiveService retrospectiveService;
+
+    private final Log logger = LoggingUtil.getLogger(RetrospectiveApiController.class);
 
     @Operation(summary = "Get all retrospectives (with pagination)")
     @ApiResponses(value = {
@@ -62,12 +62,12 @@ public class RetrospectiveApiController {
 
         // Set up pagination
         Pageable pageable = PageRequest.of(page, pageSize);
-        Optional<Page<Retrospective>> retrospectives = retrospectiveService.getAllRetrospectives(pageable);
+        Page<Retrospective> retrospectives = retrospectiveService.getAllRetrospectives(pageable);
 
         // check if any data is returned and return the response
-        if (retrospectives.isPresent()) {
+        if (!retrospectives.isEmpty()) {
             logger.info("Successfully found all retrospectives. Returning status OK");
-            return ResponseEntity.ok(retrospectives.get());
+            return ResponseEntity.ok(retrospectives);
         } else {
             logger.warn("No retrospectives found. Returning status NOT FOUND");
             return ResponseEntity.notFound().build();
@@ -85,11 +85,11 @@ public class RetrospectiveApiController {
     public ResponseEntity<List<Retrospective>> getAllRetrospectivesByDate(@Parameter(description = "Date to filter retrospectives by")
                                                                           @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         logger.info(String.format("API invoked: httpMethod=GET, path=retrospectives/filter?{date} (date=%s)", date.toString()));
-        Optional<List<Retrospective>> retrospectives = retrospectiveService.getRetrospectivesByDate(date);
+        List<Retrospective> retrospectives = retrospectiveService.getRetrospectivesByDate(date);
 
-        if (retrospectives.isPresent()) {
+        if (!retrospectives.isEmpty()) {
             logger.info("Successfully found all retrospectives with date: " + date + ". Returning status OK");
-            return ResponseEntity.ok(retrospectives.orElse(new ArrayList<>()));
+            return ResponseEntity.ok(retrospectives);
         } else {
             logger.warn("No retrospectives found with date " + date + ". Returning status NOT FOUND");
             return ResponseEntity.notFound().build();

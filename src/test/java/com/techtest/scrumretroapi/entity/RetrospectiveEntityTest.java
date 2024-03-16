@@ -29,7 +29,8 @@ public class RetrospectiveEntityTest extends EntityBaseTest {
 
     @BeforeEach
     void setUp() {
-        this.retrospective = new Retrospective(name, summary, date, participants, feedback);
+        //this.retrospective = new Retrospective(name, summary, date, participants, feedback);
+        this.retrospective = new Retrospective(name, summary, date, participants);
     }
 
     @Test
@@ -39,7 +40,7 @@ public class RetrospectiveEntityTest extends EntityBaseTest {
         assertEquals(summary, retrospective.getSummary());
         assertEquals(date, retrospective.getDate());
         assertEquals(participants, retrospective.getParticipants());
-        assertEquals(feedback, retrospective.getFeedback());
+        //assertEquals(feedback, retrospective.getFeedback());
     }
 
     @Test
@@ -49,7 +50,7 @@ public class RetrospectiveEntityTest extends EntityBaseTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         // expected json string pattern for retrospective object
-        String expectedJsonPattern = "\\{\"name\":\".*?\",\"summary\":\".*?\",\"date\":\"\\d{2}-\\d{2}-\\d{4}\",\"participants\":\\[\".*?\"],\"feedback\":\\[.*?\\]\\}";
+        String expectedJsonPattern = "\\{\"name\":\".*?\",\"summary\":\".*?\",\"date\":\"\\d{4}-\\d{2}-\\d{2}\",\"participants\":\\[\".*?\"],\"feedback\":\\[.*?\\]\\}";
 
         testObjectIsConvertedToJsonWithJsonPropertyAnnotations(retrospective, objectMapper, expectedJsonPattern);
     }

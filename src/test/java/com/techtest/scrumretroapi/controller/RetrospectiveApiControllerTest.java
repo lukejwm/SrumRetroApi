@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
+@SpringBootTest
 public class RetrospectiveApiControllerTest {
     private AutoCloseable closeable;
 
@@ -47,15 +48,20 @@ public class RetrospectiveApiControllerTest {
     @Test
     void testGetAllRetrospectivesSuccess() {
         // Mocking the service method to return a non-empty Optional with some retrospectives
+//        List<Retrospective> retrospectives = List.of(
+//                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>()),
+//                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>())
+//        );
+
         List<Retrospective> retrospectives = List.of(
-            new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>()),
-            new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>())
+                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>()),
+                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>())
         );
 
         // factor in pagination
         Page<Retrospective> page = new PageImpl<>(retrospectives);
 
-        when(retrospectiveService.getAllRetrospectives(any(Pageable.class))).thenReturn(Optional.of(page));
+        when(retrospectiveService.getAllRetrospectives(any(Pageable.class))).thenReturn(page);
 
         // Call the controller method
         ResponseEntity<Page<Retrospective>> result = retrospectiveApiController.getAllRetrospectives(0, 10); // Example: First page with 10 items
@@ -72,7 +78,7 @@ public class RetrospectiveApiControllerTest {
         // FIXME: call the pagination method BUT ensure it comes back with nothing!
         // Mocking the service method to return an empty Page
         Page<Retrospective> page = new PageImpl<>(Collections.emptyList());
-        when(retrospectiveService.getAllRetrospectives(any(Pageable.class))).thenReturn(Optional.of(page));
+        when(retrospectiveService.getAllRetrospectives(any(Pageable.class))).thenReturn(page);
 
         // Call the controller method
         ResponseEntity<Page<Retrospective>> result = retrospectiveApiController.getAllRetrospectives(0, 10); // Example: First page with 10 items

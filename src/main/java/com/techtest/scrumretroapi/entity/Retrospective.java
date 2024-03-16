@@ -3,15 +3,16 @@ package com.techtest.scrumretroapi.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.techtest.scrumretroapi.entity.feedback.Feedback;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.techtest.scrumretroapi.entity.utils.StringListConverter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Entity
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Retrospective {
@@ -26,8 +27,10 @@ public class Retrospective {
     private LocalDate date;
 
     @JsonProperty
+    @Convert(converter = StringListConverter.class)
     private List<String> participants;
 
     @JsonProperty
+    @OneToMany(mappedBy = "retrospective", cascade = CascadeType.ALL)
     private List<Feedback> feedback;
 }

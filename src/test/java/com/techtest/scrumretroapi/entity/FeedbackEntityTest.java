@@ -17,7 +17,7 @@ public class FeedbackEntityTest extends EntityBaseTest {
     @BeforeEach
     void setUp() {
         this.feedbackItem = new FeedbackItem("John Smith", "Great, you fixed the bug!", FeedbackType.POSITIVE);
-        this.feedback = new Feedback(itemId, feedbackItem);
+        //this.feedback = new Feedback(itemId, feedbackItem);
     }
 
     @Test

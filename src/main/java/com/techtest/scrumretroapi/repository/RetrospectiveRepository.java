@@ -1,164 +1,25 @@
 package com.techtest.scrumretroapi.repository;
 
 import com.techtest.scrumretroapi.entity.Retrospective;
-import com.techtest.scrumretroapi.entity.feedback.Feedback;
-import com.techtest.scrumretroapi.entity.feedback.FeedbackItem;
-import com.techtest.scrumretroapi.utils.LoggingUtil;
-import org.apache.commons.logging.Log;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class RetrospectiveRepository {
-    // before interfacing with the database, store all data in a list to simply ensure that all API functions are working and then
-    // integrate with database
+public interface RetrospectiveRepository extends JpaRepository<Retrospective, Long> {
+    @Query(value = "SELECT r FROM Retrospective r ORDER BY r.name")
+    Page<Retrospective> findAllRetrospectives(Pageable pageable);
 
-    private final List<Retrospective> retrospectiveList = new ArrayList<>();
-    private final Log logger = LoggingUtil.getLogger(RetrospectiveRepository.class);
+    @Query("SELECT r FROM Retrospective r WHERE r.date = :date")
+    List<Retrospective> findRetrospectivesByDate(@Param("date") LocalDate date);
 
-    public RetrospectiveRepository() {
-        List<String> participants1 = new ArrayList<>(List.of("Fred", "Tom", "Joan"));
-        List<String> participants2 = new ArrayList<>(List.of("Hannah", "Gavin", "Derek"));
-
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 1", "Post release retrospective", LocalDate.now(), participants1, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 2", "Another post release retrospective", LocalDate.now(), participants1, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 3", "Pre release retrospective", LocalDate.now(), participants2, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 4", "Post sprint retrospective", LocalDate.now(), participants1, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 5", "Some retrospective", LocalDate.now(), participants2, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 6", "Another post release retrospective", LocalDate.now(), participants1, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 7", "Another pre release retrospective", LocalDate.now(), participants2, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 8", "Tech support retrospective", LocalDate.now(), participants1, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 9", "Another tech support retrospective", LocalDate.now(), participants2, new ArrayList<>()));
-        retrospectiveList.add(new Retrospective(
-                "Retrospective 10", "Some other retrospective", LocalDate.now(), participants1, new ArrayList<>()));
-    }
-
-    public Optional<Page<Retrospective>> getAllRetrospectives(Pageable pageable) {
-        if (retrospectiveList.isEmpty()) {
-            logger.debug("No retrospectives available. Returning empty optional.");
-            return Optional.empty();
-        } else {
-            int start = (int) pageable.getOffset();
-            int end = Math.min((start + pageable.getPageSize()), retrospectiveList.size());
-            List<Retrospective> content = retrospectiveList.subList(start, end);
-            Page<Retrospective> page = new PageImpl<>(content, pageable, retrospectiveList.size());
-            logger.debug("Retrieved " + content.size() + " retrospectives for page: " + pageable.getPageNumber() + ", size: " + pageable.getPageSize());
-            return Optional.of(page);
-        }
-    }
-
-    public Optional<List<Retrospective>> getRetrospectivesByDate(LocalDate date) {
-        List<Retrospective> filteredList = retrospectiveList.stream().filter(retrospective -> retrospective.getDate().equals(date)).toList();
-        if (filteredList.isEmpty()) {
-            logger.debug("No retrospectives found for date: " + date);
-            return Optional.empty();
-        } else {
-            logger.debug("Retrieved " + filteredList.size() + " retrospectives for date: " + date);
-            return Optional.of(filteredList);
-        }
-    }
-
-    public void createNewRetrospective(Retrospective retrospective) {
-        logger.debug("Adding new retrospective: " + retrospective);
-        retrospectiveList.add(retrospective);
-        logger.info("New retrospective added successfully: " + retrospective);
-    }
-
-    public boolean existsByName(String name) {
-        boolean exists = retrospectiveList.stream().anyMatch(r -> r.getName().equals(name));
-        logger.debug("Checking existence of retrospective with name '" + name + "': " + exists);
-        return exists;
-    }
-
-    public void createNewFeedbackForRetrospective(String retrospectiveName, FeedbackItem newFeedbackItem) {
-        retrospectiveList.stream()
-                .filter(r -> r.getName().equals(retrospectiveName))
-                .findFirst()
-                .ifPresent(retrospective -> {
-                    // Log the start of the method
-                    logger.info("Attempting to create new feedback for retrospective: " + retrospectiveName);
-
-                    // Get the existing feedback list
-                    List<Feedback> feedbackList = new ArrayList<>(retrospective.getFeedback());
-
-                    // Log the size of the existing feedback list
-                    logger.debug("Existing feedback list size: " + feedbackList.size());
-
-                    // Find the new id
-                    int newItemId = feedbackList.size() + 1;
-
-                    // Log the new item id
-                    logger.debug("New item id: " + newItemId);
-
-                    // Add the new feedback item with the new id
-                    feedbackList.add(new Feedback(newItemId, newFeedbackItem));
-
-                    // Log the addition of the new feedback item
-                    logger.info("New feedback item added: " + newFeedbackItem);
-
-                    // Update the retrospective with the new feedback list
-                    retrospective.setFeedback(feedbackList);
-
-                    // Log the end of the method
-                    logger.info("New feedback added successfully for retrospective: " + retrospectiveName);
-                });
-    }
-
-    public void updateFeedbackForRetrospective(String retrospectiveName, int itemId, FeedbackItem newFeedbackItem) {
-        retrospectiveList.stream()
-                .filter(r -> r.getName().equals(retrospectiveName))
-                .findFirst()
-                .ifPresent(retrospective -> {
-                    // Log the start of the method
-                    logger.info("Attempting to update feedback for retrospective: " + retrospectiveName);
-
-                    // Get the existing feedback list
-                    List<Feedback> feedbackList = new ArrayList<>(retrospective.getFeedback());
-
-                    // Log the size of the existing feedback list
-                    logger.debug("Existing feedback list size: " + feedbackList.size());
-
-                    // Find the feedback item by its ID
-                    Optional<Feedback> feedbackToUpdate = feedbackList.stream()
-                            .filter(feedback -> feedback.getItem() == itemId)
-                            .findFirst();
-
-                    // Log if the feedback item is found or not
-                    if (feedbackToUpdate.isPresent()) {
-                        logger.debug("Feedback item found with id: " + itemId);
-                    } else {
-                        logger.debug("Feedback item not found with id: " + itemId);
-                    }
-
-                    // Update the feedback item if found
-                    feedbackToUpdate.ifPresent(feedback -> {
-                        // Log the update of the feedback item
-                        logger.info("Updating feedback item with id: " + itemId);
-                        feedback.setItemBody(newFeedbackItem);
-                    });
-
-                    // Update the retrospective with the modified feedback list
-                    retrospective.setFeedback(feedbackList);
-
-                    // Log the end of the method
-                    logger.info("Feedback updated successfully for retrospective: " + retrospectiveName);
-                });
-    }
+    @Query("SELECT r FROM Retrospective r WHERE r.name = :name")
+    Retrospective findByName(@Param("name") String name);
 }

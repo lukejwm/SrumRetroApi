@@ -1,10 +1,9 @@
 package com.techtest.scrumretroapi.entity.feedback;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.techtest.scrumretroapi.entity.utils.EnumConverter;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -17,5 +16,6 @@ public class FeedbackItem {
     private String body;
 
     @JsonProperty
+    @Convert(converter = EnumConverter.class)
     private FeedbackType feedbackType;
 }
