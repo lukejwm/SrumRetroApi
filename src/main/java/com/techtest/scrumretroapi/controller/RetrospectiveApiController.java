@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-// TODO: include logging!
+// TODO: include logging and pagination
 
 @RestController
 @OpenAPIDefinition(
