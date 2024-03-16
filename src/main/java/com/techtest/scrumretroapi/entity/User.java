@@ -1,4 +1,4 @@
-package com.example.template.entity;
+package com.techtest.scrumretroapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Id;

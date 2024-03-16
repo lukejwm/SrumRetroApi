@@ -1,4 +1,4 @@
-package com.example.template.entity;
+package com.techtest.scrumretroapi.entity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.example.template;
+package com.techtest.scrumretroapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class TemplateApplication {
+public class ScrumRetroApiApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(TemplateApplication.class, args);
+		SpringApplication.run(ScrumRetroApiApplication.class, args);
 	}
 }

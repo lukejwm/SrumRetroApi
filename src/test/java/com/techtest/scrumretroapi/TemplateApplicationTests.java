@@ -1,4 +1,4 @@
-package com.example.template;
+package com.techtest.scrumretroapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

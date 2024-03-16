@@ -1,6 +1,6 @@
-package com.example.template.controller;
+package com.techtest.scrumretroapi.controller;
 
-import com.example.template.entity.User;
+import com.techtest.scrumretroapi.entity.User;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
