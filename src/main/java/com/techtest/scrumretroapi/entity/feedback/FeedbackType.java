@@ -1,4 +1,4 @@
-package com.techtest.scrumretroapi.entity;
+package com.techtest.scrumretroapi.entity.feedback;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
 package com.techtest.scrumretroapi.service;
 
-public class UserService {
+public class RetrospectiveService {
 }

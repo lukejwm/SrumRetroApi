@@ -1,4 +1,4 @@
-package com.techtest.scrumretroapi.entity;
+package com.techtest.scrumretroapi.entity.feedback;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Id;
@@ -9,13 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Feedback {
-    // It is possible two people in an organization have the same name, so username can act as a unique identifier
+public class FeedbackItem {
     @Id
-    private String username;
-
-    @JsonProperty
-    private String nameOfReporter;
+    private String name;
 
     @JsonProperty
     private String body;

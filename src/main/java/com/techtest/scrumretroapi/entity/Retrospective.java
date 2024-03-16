@@ -2,6 +2,7 @@ package com.techtest.scrumretroapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.techtest.scrumretroapi.entity.feedback.Feedback;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;

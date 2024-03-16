@@ -1,4 +1,4 @@
 package com.techtest.scrumretroapi.repository;
 
-public class UserRepository {
+public class RetrospectiveRepository {
 }

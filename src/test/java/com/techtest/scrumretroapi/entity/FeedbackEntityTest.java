@@ -1,41 +1,36 @@
 package com.techtest.scrumretroapi.entity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.techtest.scrumretroapi.entity.feedback.Feedback;
+import com.techtest.scrumretroapi.entity.feedback.FeedbackItem;
+import com.techtest.scrumretroapi.entity.feedback.FeedbackType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FeedbackEntityTest extends EntityBaseTest {
-    private final String username = "username123";
-    private final String nameOfReporter = "John Smith";
-    private final String body = "Great, you fixed the bug!";
-    private final FeedbackType feedbackType = FeedbackType.POSITIVE;
+    private final int itemId = 1;
     private Feedback feedback;
+    private FeedbackItem feedbackItem;
 
     @BeforeEach
     void setUp() {
-        this.feedback = new Feedback(username, nameOfReporter, body, feedbackType);
+        this.feedbackItem = new FeedbackItem("John Smith", "Great, you fixed the bug!", FeedbackType.POSITIVE);
+        this.feedback = new Feedback(itemId, feedbackItem);
     }
 
     @Test
     void testObjectInitialisationWithConstructor() {
         // Read the data from the object and verify that it matches the input
-        assertEquals(username, feedback.getUsername());
-        assertEquals(nameOfReporter, feedback.getNameOfReporter());
-        assertEquals(body, feedback.getBody());
-        assertEquals(feedbackType, feedback.getFeedbackType());
+        assertEquals(itemId, feedback.getItem());
+        assertEquals(feedbackItem, feedback.getItemBody());
     }
 
     @Test
     void testObjectIsConvertedToJsonWithJsonPropertyAnnotations() {
         ObjectMapper objectMapper = new ObjectMapper();
-        String expectedJsonPattern = "\\{\"username\":\".*?\",\"nameOfReporter\":\".*?\",\"body\":\".*?\",\"feedbackType\":\".*?\"\\}";
+        String expectedJsonPattern = "\\{\"item\":\\d+,\"itemBody\":\\{\"name\":\".*?\",\"body\":\".*?\",\"feedbackType\":\".*?\"\\}\\}";
 
         testObjectIsConvertedToJsonWithJsonPropertyAnnotations(feedback, objectMapper, expectedJsonPattern);
     }

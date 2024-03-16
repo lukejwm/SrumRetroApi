@@ -18,7 +18,6 @@ public abstract class EntityBaseTest {
     void testObjectIsConvertedToJsonWithJsonPropertyAnnotations(Object object, ObjectMapper objectMapper, String expectedJsonPattern) {
         try {
             String actualJsonString = objectMapper.writeValueAsString(object);
-            System.out.println(actualJsonString);
 
             // Use regex pattern matching to verify that the produced JSON string is formatted correctly
             Pattern jsonPattern = Pattern.compile(expectedJsonPattern);
