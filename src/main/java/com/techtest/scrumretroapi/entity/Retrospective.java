@@ -22,7 +22,7 @@ public class Retrospective {
     private String summary;
 
     @JsonProperty
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     @JsonProperty

@@ -15,7 +15,7 @@ public class RetrospectiveRepository {
     // before interfacing with the database, store all data in a list to simply ensure that all API functions are working and then
     // integrate with database
 
-    private List<Retrospective> retrospectiveList = new ArrayList<>();
+    private final List<Retrospective> retrospectiveList = new ArrayList<>();
 
     public RetrospectiveRepository() {
         List<String> participants1 = new ArrayList<>(List.of("Fred", "Tom", "Joan"));
@@ -52,7 +52,9 @@ public class RetrospectiveRepository {
         return filteredList.isEmpty() ? Optional.empty() : Optional.of(filteredList);
     }
 
-    public void createNewRetrospective(Retrospective retrospective) {}
+    public void createNewRetrospective(Retrospective retrospective) {
+        retrospectiveList.add(retrospective);
+    }
 
     public void createNewFeedbackForRetrospective(String retrospectiveName, FeedbackItem newFeedbackItem) {}
 

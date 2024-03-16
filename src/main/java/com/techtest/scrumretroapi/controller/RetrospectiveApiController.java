@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,7 +76,7 @@ public class RetrospectiveApiController {
             @ApiResponse(responseCode = "500", description = "Failed to create new retrospective in server", content = @Content)
     })
     @PostMapping("/")
-    public ResponseEntity<Void> createNewRetrospective(
+    public ResponseEntity<String> createNewRetrospective(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "New retrospective to be created.",
                     required = true,
@@ -83,13 +84,16 @@ public class RetrospectiveApiController {
                             schema = @Schema(implementation = Retrospective.class)
                     ))
             @RequestBody final Retrospective retrospective) {
+
+        // TODO: add appropriate logging!
         try {
             retrospectiveService.createNewRetrospective(retrospective);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("Successfully created new retrospective");
         } catch (IllegalArgumentException exp) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatusCode.valueOf(400)).build();
         } catch (Exception exp) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unable to create new item. Process failed with exception: " + exp.getMessage());
         }
     }
 

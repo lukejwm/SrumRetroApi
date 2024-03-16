@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
@@ -108,17 +109,26 @@ public class RetrospectiveApiControllerTest {
     public void testCreateNewRetrospective() {
         // Mock the service method
         Retrospective retrospective = new Retrospective();
-        doNothing().when(retrospectiveService).createNewRetrospective(retrospective);
 
-        // Call the controller method
-        ResponseEntity<Void> result = retrospectiveApiController.createNewRetrospective(retrospective);
+        try {
+            doNothing().when(retrospectiveService).createNewRetrospective(retrospective);
 
-        // Verify the service method was called
-        verify(retrospectiveService, times(1)).createNewRetrospective(retrospective);
+            // Call the controller method
+            ResponseEntity<String> result = retrospectiveApiController.createNewRetrospective(retrospective);
 
-        // Verify the result
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+            // Verify the service method was called
+            verify(retrospectiveService, times(1)).createNewRetrospective(retrospective);
+
+            // Verify the result
+            assertEquals(HttpStatus.OK, result.getStatusCode());
+        } catch (Exception exp) {
+            // Display the error message and fail the test
+            System.err.println("Exception thrown: " + exp.getMessage());
+            fail();
+        }
     }
+
+    // TODO: add test case for when exception is thrown
 
     @Test
     public void testAddFeedbackToRetrospective() {

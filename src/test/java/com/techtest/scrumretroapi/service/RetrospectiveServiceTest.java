@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 public class RetrospectiveServiceTest {
@@ -79,11 +80,19 @@ public class RetrospectiveServiceTest {
         doNothing().when(retrospectiveRepository).createNewRetrospective(retrospective);
 
         // Call the service method
-        retrospectiveService.createNewRetrospective(retrospective);
+        try {
+            retrospectiveService.createNewRetrospective(retrospective);
+        } catch (Exception exp) {
+            // if exception is thrown, then fail the test
+            System.err.println("Exception thrown: " + exp.getMessage());
+            fail();
+        }
 
         // Verify the repository method was called
         verify(retrospectiveRepository, times(1)).createNewRetrospective(retrospective);
     }
+
+    // TODO: add test to check that exception does get thrown!
 
     @Test
     void testCreateNewFeedbackForRetrospective() {
