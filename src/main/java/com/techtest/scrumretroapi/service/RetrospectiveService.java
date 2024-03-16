@@ -23,33 +23,44 @@ public class RetrospectiveService {
     }
 
     public Optional<Page<Retrospective>> getAllRetrospectives(Pageable pageable) {
-        return retrospectiveRepository.getAllRetrospectives(pageable);
+        logger.info("Attempting to retrieve all retrospectives with pagination");
+        Optional<Page<Retrospective>> result = retrospectiveRepository.getAllRetrospectives(pageable);
+        result.ifPresent(page -> logger.info("Retrieved " + page.getNumberOfElements() + " retrospectives"));
+        return result;
     }
 
     public Optional<List<Retrospective>> getRetrospectivesByDate(LocalDate date) {
-        // TODO: convert date to string?
+        logger.info("Attempting to retrieve retrospectives for date: " + date);
         return retrospectiveRepository.getRetrospectivesByDate(date);
     }
 
     public void createNewRetrospective(Retrospective retrospective) throws Exception {
         String nameToCheck = retrospective.getName();
+        logger.debug(String.format("Attempting to add new retrospective with name='%s'", nameToCheck));
 
-        // check if the name already exists in the repository
+        // Check if the name already exists in the repository
         boolean nameAlreadyExists = retrospectiveRepository.existsByName(nameToCheck);
 
         if (nameAlreadyExists) {
-            // TODO: log this!
-            throw new Exception(String.format("The retrospective name '%s' has already been added!", nameToCheck));
+            String errorMessage = String.format("The retrospective name '%s' has already been added!", nameToCheck);
+            logger.error(errorMessage);
+            throw new Exception(errorMessage);
         } else {
+            logger.info("Creating a new retrospective with name: " + nameToCheck);
             retrospectiveRepository.createNewRetrospective(retrospective);
+            logger.info("New retrospective created successfully");
         }
     }
 
     public void createNewFeedbackForRetrospective(String retrospectiveName, FeedbackItem newFeedbackItem) {
+        logger.info("Adding new feedback to retrospective: " + retrospectiveName);
+        logger.debug("Adding feedback with values: " + newFeedbackItem);
         retrospectiveRepository.createNewFeedbackForRetrospective(retrospectiveName, newFeedbackItem);
     }
 
     public void updateFeedbackForRetrospective (String retrospectiveName, int itemId, FeedbackItem feedbackItem) {
+        logger.info("Updating feedback for retrospective: " + retrospectiveName + ", item ID: " + itemId);
+        logger.debug("Adding feedback with values: " + feedbackItem);
         retrospectiveRepository.updateFeedbackForRetrospective(retrospectiveName, itemId, feedbackItem);
     }
 }

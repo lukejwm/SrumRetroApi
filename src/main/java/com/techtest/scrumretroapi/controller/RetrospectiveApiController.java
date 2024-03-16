@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// TODO: add pagination
-
 @RestController
 @OpenAPIDefinition(
         info = @Info(
@@ -60,7 +58,7 @@ public class RetrospectiveApiController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int pageSize) {
         logger.info("API invoked: httpMethod=GET, path=/retrospectives/all");
-        logger.info("Attempting to get all retrospectives with pagination");
+        logger.info(String.format("Attempting to get all retrospectives with pagination page=%d, pageSize=%d", page, pageSize));
 
         // Set up pagination
         Pageable pageable = PageRequest.of(page, pageSize);
@@ -86,7 +84,7 @@ public class RetrospectiveApiController {
     @GetMapping("/filter")
     public ResponseEntity<List<Retrospective>> getAllRetrospectivesByDate(@Parameter(description = "Date to filter retrospectives by")
                                                                           @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        logger.info("API invoked: httpMethod=GET, path=retrospectives/filter?{date}, with query date=" + date.toString());
+        logger.info(String.format("API invoked: httpMethod=GET, path=retrospectives/filter?{date} (date=%s)", date.toString()));
         Optional<List<Retrospective>> retrospectives = retrospectiveService.getRetrospectivesByDate(date);
 
         if (retrospectives.isPresent()) {
@@ -152,11 +150,14 @@ public class RetrospectiveApiController {
         logger.info("Attempting to add new feedback for retrospective with values: " + newFeedbackItem);
 
         try {
+            logger.info(String.format("Feedback for retrospective '%s' successfully added. Returning status OK", retrospectiveName));
             retrospectiveService.createNewFeedbackForRetrospective(retrospectiveName, newFeedbackItem);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException exp) {
+            logger.warn("Retrospective not found for name: " + retrospectiveName);
             return ResponseEntity.notFound().build();
         } catch (Exception exp) {
+            logger.error("Failed to add feedback to retrospective: " + retrospectiveName, exp);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -179,12 +180,20 @@ public class RetrospectiveApiController {
                             schema = @Schema(implementation = FeedbackItem.class)
                     ))
             @RequestBody FeedbackItem feedbackItem) {
+        logger.info(String.format("API Invoked: httpMethod=PUT path='/retrospective/%s/feedback/%d'", retrospectiveName, itemId));
+        logger.info(String.format("Updating feedback for retrospective: %s, item ID: %d", retrospectiveName, itemId));
+        logger.info("Attempting to update feedback for retrospective with values: " + feedbackItem);
+
         try {
+            logger.info(String.format("Feedback for retrospective '%s', feedback item '%d' successfully updated. Returning status OK",
+                    retrospectiveName, itemId));
             retrospectiveService.updateFeedbackForRetrospective(retrospectiveName, itemId, feedbackItem);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException exp) {
+            logger.warn("Feedback item not found for retrospective: " + retrospectiveName + ", item ID: " + itemId);
             return ResponseEntity.notFound().build();
         } catch (Exception exp) {
+            logger.error("Failed to update feedback for retrospective: " + retrospectiveName + ", item ID: " + itemId, exp);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
