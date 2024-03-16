@@ -1,6 +1,8 @@
 package com.techtest.scrumretroapi.controller;
 
 import com.techtest.scrumretroapi.entity.Retrospective;
+import com.techtest.scrumretroapi.entity.feedback.FeedbackItem;
+import com.techtest.scrumretroapi.service.RetrospectiveService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,11 +13,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+// TODO: include logging!
 
 @RestController
 @OpenAPIDefinition(
@@ -26,7 +32,13 @@ import java.util.Optional;
 )
 @RequestMapping("/retrospective")
 @Tag(name = "Scrum Retrospective API")
-public class RetrospectiveController {
+public class RetrospectiveApiController {
+    private final RetrospectiveService retrospectiveService;
+
+    public RetrospectiveApiController(RetrospectiveService retrospectiveService) {
+        this.retrospectiveService = retrospectiveService;
+    }
+
     @Operation(summary = "Get all retrospectives")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Returned all available retrospectives from the server",
@@ -36,8 +48,7 @@ public class RetrospectiveController {
     })
     @GetMapping("/all")
     public Optional<List<Retrospective>> getAllRetrospectives() {
-        // TODO: implement logic in service and add pagination
-        return Optional.empty();
+        return retrospectiveService.getAllRetrospectives();
     }
 
     @Operation(summary = "Get all retrospectives by date")
@@ -49,9 +60,8 @@ public class RetrospectiveController {
     })
     @GetMapping("/by-date/{date}")
     public Optional<List<Retrospective>> getAllRetrospectivesByDate(@Parameter(description = "Date to filter retrospectives")
-                                                           @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        // TODO: implement logic in service and add pagination
-        return Optional.empty();
+                                                                    @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return retrospectiveService.getRetrospectivesByDate(date);
     }
 
     @Operation(summary = "Create a new retrospective",
@@ -62,7 +72,7 @@ public class RetrospectiveController {
             @ApiResponse(responseCode = "500", description = "Failed to create new retrospective in server", content = @Content)
     })
     @PostMapping("/")
-    public void createNewRetrospective(
+    public ResponseEntity<Void> createNewRetrospective(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "New retrospective to be created.",
                     required = true,
@@ -70,7 +80,14 @@ public class RetrospectiveController {
                             schema = @Schema(implementation = Retrospective.class)
                     ))
             @RequestBody final Retrospective retrospective) {
-        // TODO: implement logic in service
+        try {
+            retrospectiveService.createNewRetrospective(retrospective);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException exp) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception exp) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @Operation(summary = "Create feedback for existing retrospective")
@@ -80,9 +97,24 @@ public class RetrospectiveController {
             @ApiResponse(responseCode = "404", description = "Retrospective not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Failed to create new feedback for retrospective in server", content = @Content)
     })
-    @PutMapping("/{name}")
-    public void addFeedbackToRetrospective(@PathVariable String name) {
-        // TODO: implement logic in service
+    @PutMapping("/{retrospectiveName}/feedback")
+    public ResponseEntity<Void> addFeedbackToRetrospective(
+            @PathVariable String retrospectiveName,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "New feedback to be created for retrospective.",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = FeedbackItem.class)
+                    ))
+            @RequestBody FeedbackItem newFeedbackItem) {
+        try {
+            retrospectiveService.createNewFeedbackForRetrospective(retrospectiveName, newFeedbackItem);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException exp) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception exp) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @Operation(summary = "Update feedback for retrospective")
@@ -92,7 +124,24 @@ public class RetrospectiveController {
             @ApiResponse(responseCode = "404", description = "Feedback item not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Failed to update feedback in server", content = @Content)
     })
-    @PutMapping("/feedback/{itemName}")
-    public void updateFeedbackItem(@PathVariable String itemName) {
+    @PutMapping("{retrospectiveName}/feedback/{itemId}")
+    public ResponseEntity<Void> updateFeedbackItem(
+            @PathVariable String retrospectiveName,
+            @PathVariable int itemId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Retrospective feedback to be edited",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = FeedbackItem.class)
+                    ))
+            @RequestBody FeedbackItem feedbackItem) {
+        try {
+            retrospectiveService.updateFeedbackForRetrospective(retrospectiveName, itemId, feedbackItem);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException exp) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception exp) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
