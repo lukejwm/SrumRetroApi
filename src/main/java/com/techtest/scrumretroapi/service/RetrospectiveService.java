@@ -49,17 +49,17 @@ public class RetrospectiveService {
             throw new Exception(errorMessage);
         } else {
             // Check if feedback has been included in the create request
-            List<Feedback> feedbackList = retrospective.getFeedback();
+            //List<Feedback> feedbackList = retrospective.getFeedback();
 
             logger.info("Creating a new retrospective with name: " + nameToCheck);
+            retrospectiveRepository.save(retrospective);
+            logger.info("New retrospective created successfully");
 
-            if (feedbackList.isEmpty()) {
-                // save the retrospective as normal
-                retrospectiveRepository.save(retrospective);
-                logger.info("New retrospective created successfully");
-            } else {
-                //retrospectiveRepository.createNewRetrospectiveWithFeedback(retrospective);
-            }
+//            if (feedbackList.isEmpty()) {
+//                // save the retrospective as normal
+//                retrospectiveRepository.save(retrospective);
+//                logger.info("New retrospective created successfully");
+//            }
         }
     }
 

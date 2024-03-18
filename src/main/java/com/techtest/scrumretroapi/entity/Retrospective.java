@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Transactional
 @Getter
 @Setter
 @NoArgsConstructor
@@ -42,6 +41,6 @@ public class Retrospective {
     private List<String> participants;
 
     @JsonProperty
-    @OneToMany(mappedBy = "retrospective", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = Feedback.class)
     private List<Feedback> feedback;
 }

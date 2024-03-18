@@ -5,32 +5,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.techtest.scrumretroapi.entity.Retrospective;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
-@Entity
-@Transactional
-@Getter
-@Setter
+@Embeddable
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Feedback implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty
     @Column(name = "item_id")
     private int item;
 
     @JsonProperty
-    @OneToOne(mappedBy = "feedback", cascade = CascadeType.ALL)
-    @JoinColumn(name = "fk_feedback_item_id")
+    @Embedded
     private FeedbackItem itemBody;
-
-    @ManyToOne
-    @JoinColumn(name = "id")
-    @JsonIgnore
-    private Retrospective retrospective;
 }

@@ -14,10 +14,10 @@ import java.util.List;
 
 @Repository
 public interface RetrospectiveRepository extends JpaRepository<Retrospective, Long> {
-    @Query(value = "SELECT r FROM Retrospective r ORDER BY r.name")
+    @Query(value = "SELECT DISTINCT r FROM Retrospective r LEFT JOIN FETCH r.feedback ORDER BY r.name")
     Page<Retrospective> findAllRetrospectives(Pageable pageable);
 
-    @Query("SELECT r FROM Retrospective r WHERE r.date = :date")
+    @Query("SELECT r FROM Retrospective r LEFT JOIN FETCH r.feedback WHERE r.date = :date")
     List<Retrospective> findRetrospectivesByDate(@Param("date") LocalDate date);
 
     @Query("SELECT r FROM Retrospective r WHERE r.name = :name")

@@ -1,0 +1,4 @@
+INSERT INTO feedback_item (participant_name, feedback_text, feedback_type) VALUES ('John', 'Feedback', 'POSITIVE');
+INSERT INTO feedback_item (participant_name, feedback_text, feedback_type) VALUES ('Derek', 'Feedback', 'IDEA');
+INSERT INTO feedback_item (participant_name, feedback_text, feedback_type) VALUES ('Susan', 'Feedback', 'NEGATIVE');
+
