@@ -48,14 +48,9 @@ public class RetrospectiveApiControllerTest {
     @Test
     void testGetAllRetrospectivesSuccess() {
         // Mocking the service method to return a non-empty Optional with some retrospectives
-//        List<Retrospective> retrospectives = List.of(
-//                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>()),
-//                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>())
-//        );
-
         List<Retrospective> retrospectives = List.of(
-                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>()),
-                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>())
+                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>()),
+                new Retrospective("Retrospective 1", "Post release retrospective", LocalDate.now(), new ArrayList<>(), new ArrayList<>())
         );
 
         // factor in pagination
@@ -93,7 +88,7 @@ public class RetrospectiveApiControllerTest {
         // Mock the service method
         LocalDate date = LocalDate.now();
         List<Retrospective> retrospectives = Collections.singletonList(new Retrospective());
-        when(retrospectiveService.getRetrospectivesByDate(date)).thenReturn(Optional.of(retrospectives));
+        when(retrospectiveService.getRetrospectivesByDate(date)).thenReturn(retrospectives);
 
         // Call the controller method
         ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectivesByDate(date);
@@ -107,7 +102,7 @@ public class RetrospectiveApiControllerTest {
     void testGetAllRetrospectivesByDateFail() {
         // Mock the service method
         LocalDate date = LocalDate.now();
-        when(retrospectiveService.getRetrospectivesByDate(date)).thenReturn(Optional.empty());
+        when(retrospectiveService.getRetrospectivesByDate(date)).thenReturn(new ArrayList<>());
 
         // Call the controller method
         ResponseEntity<List<Retrospective>> result = retrospectiveApiController.getAllRetrospectivesByDate(date);

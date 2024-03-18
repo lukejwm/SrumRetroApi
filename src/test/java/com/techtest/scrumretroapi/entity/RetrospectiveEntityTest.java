@@ -29,8 +29,7 @@ public class RetrospectiveEntityTest extends EntityBaseTest {
 
     @BeforeEach
     void setUp() {
-        //this.retrospective = new Retrospective(name, summary, date, participants, feedback);
-        this.retrospective = new Retrospective(name, summary, date, participants);
+        this.retrospective = new Retrospective(name, summary, date, participants, feedback);
     }
 
     @Test

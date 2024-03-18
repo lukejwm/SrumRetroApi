@@ -67,12 +67,12 @@ public class RetrospectiveServiceTest {
         when(retrospectiveRepository.findRetrospectivesByDate(date)).thenReturn(retrospectives);
 
         // Act
-        Optional<List<Retrospective>> result = retrospectiveService.getRetrospectivesByDate(date);
+       List<Retrospective> result = retrospectiveService.getRetrospectivesByDate(date);
 
         // Assert
         verify(retrospectiveRepository, times(1)).findRetrospectivesByDate(date);
-        assertTrue(result.isPresent());
-        assertSame(retrospectives, result.get());
+        assertFalse(result.isEmpty());
+        assertSame(retrospectives, result);
     }
 
     @Test
