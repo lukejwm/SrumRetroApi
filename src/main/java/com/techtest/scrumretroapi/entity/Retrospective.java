@@ -1,13 +1,14 @@
 package com.techtest.scrumretroapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.techtest.scrumretroapi.entity.feedback.Feedback;
 import com.techtest.scrumretroapi.entity.utils.StringListConverter;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;

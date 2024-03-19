@@ -16,19 +16,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @OpenAPIDefinition(
@@ -46,14 +44,15 @@ public class RetrospectiveApiController {
 
     private final Log logger = LoggingUtil.getLogger(RetrospectiveApiController.class);
 
-    @Operation(summary = "Get all retrospectives (with pagination)")
+    @Operation(summary = "Get all retrospectives (with pagination)", description = "Get all retrospectives with pagination. Returns data in JSON or XML format based on the 'Accept' header.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Returned all available retrospectives from the server",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Retrospective.class))}),
-            @ApiResponse(responseCode = "404", description = "No retrospective data found", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Failed to fetch retrospectives from server", content = @Content)
+                    content = {@io.swagger.v3.oas.annotations.media.Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Retrospective.class)),
+                            @io.swagger.v3.oas.annotations.media.Content(mediaType = MediaType.APPLICATION_XML_VALUE, schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Retrospective.class))}),
+            @ApiResponse(responseCode = "404", description = "No retrospective data found"),
+            @ApiResponse(responseCode = "500", description = "Failed to fetch retrospectives from server")
     })
-    @GetMapping("/all")
+    @GetMapping(value = "/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Page<Retrospective>> getAllRetrospectives(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int pageSize) {
