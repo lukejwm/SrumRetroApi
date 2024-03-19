@@ -19,10 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Retrospective {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonIgnore
-    private Long id;
-
     @JsonProperty
     @Column(name = "retrospective_name", length = 100, nullable = false, unique = true)
     private String name;

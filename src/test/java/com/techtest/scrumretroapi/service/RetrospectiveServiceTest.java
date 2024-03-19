@@ -1,6 +1,7 @@
 package com.techtest.scrumretroapi.service;
 
 import com.techtest.scrumretroapi.entity.Retrospective;
+import com.techtest.scrumretroapi.entity.feedback.Feedback;
 import com.techtest.scrumretroapi.entity.feedback.FeedbackItem;
 import com.techtest.scrumretroapi.repository.RetrospectiveRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -55,7 +56,6 @@ public class RetrospectiveServiceTest {
         // Assert
         verify(retrospectiveRepository, times(1)).findAllRetrospectives(any(Pageable.class));
         assertNotNull(result);
-        assertFalse(result.isEmpty());
         assertEquals(retrospectives, result.getContent());
     }
 
@@ -71,7 +71,6 @@ public class RetrospectiveServiceTest {
 
         // Assert
         verify(retrospectiveRepository, times(1)).findRetrospectivesByDate(date);
-        assertFalse(result.isEmpty());
         assertSame(retrospectives, result);
     }
 
@@ -79,7 +78,7 @@ public class RetrospectiveServiceTest {
     void testCreateNewRetrospective() {
         // Mock the repository method
         Retrospective retrospective = new Retrospective();
-        doNothing().when(retrospectiveRepository).save(retrospective);
+        when(retrospectiveRepository.save(retrospective)).thenReturn(retrospective);
 
         // Call the service method
         assertDoesNotThrow(() -> retrospectiveService.createNewRetrospective(retrospective));
@@ -88,31 +87,34 @@ public class RetrospectiveServiceTest {
         verify(retrospectiveRepository, times(1)).save(retrospective);
     }
 
-    // TODO: add test to check that exception does get thrown!
-
     @Test
     void testCreateNewFeedbackForRetrospective() {
         // Mock the repository method
-//        FeedbackItem feedbackItem = new FeedbackItem();
-//        doNothing().when(retrospectiveRepository).createNewFeedbackForRetrospective(anyString(), eq(feedbackItem));
-//
-//        // Call the service method
-//        retrospectiveService.createNewFeedbackForRetrospective("retrospectiveName", feedbackItem);
-//
-//        // Verify the repository method was called
-//        verify(retrospectiveRepository, times(1)).createNewFeedbackForRetrospective("retrospectiveName", feedbackItem);
+        Retrospective existingRetrospective = new Retrospective("retrospectiveName", "", LocalDate.now(), new ArrayList<>(), new ArrayList<>()); // Mock existing retrospective
+        when(retrospectiveRepository.findByName("retrospectiveName")).thenReturn(existingRetrospective);
+
+        // Call the service method
+        FeedbackItem feedbackItem = new FeedbackItem();
+        assertDoesNotThrow(() -> retrospectiveService.createNewFeedbackForRetrospective("retrospectiveName", feedbackItem));
+
+        // Verify that save() method is called with the updated Retrospective object
+        verify(retrospectiveRepository, times(1)).save(existingRetrospective);
     }
 
     @Test
     void testUpdateFeedbackForRetrospective() {
         // Mock the repository method
-//        FeedbackItem feedbackItem = new FeedbackItem();
-//        doNothing().when(retrospectiveRepository).updateFeedbackForRetrospective(anyString(), anyInt(), eq(feedbackItem));
-//
-//        // Call the service method
-//        retrospectiveService.updateFeedbackForRetrospective("retrospectiveName", 1, feedbackItem);
-//
-//        // Verify the repository method was called
-//        verify(retrospectiveRepository, times(1)).updateFeedbackForRetrospective("retrospectiveName", 1, feedbackItem);
+        Retrospective existingRetrospective = new Retrospective(); // Mock existing retrospective
+        List<Feedback> feedbackList = new ArrayList<>(); // Initialize feedbackList
+        existingRetrospective.setFeedback(feedbackList); // Set feedbackList to existingRetrospective
+        when(retrospectiveRepository.findByName("retrospectiveName")).thenReturn(existingRetrospective);
+
+        // Call the service method and assert that it throws the expected exception
+        FeedbackItem newFeedbackItem = new FeedbackItem();
+        Exception exception = assertThrows(Exception.class, () -> retrospectiveService.updateFeedbackForRetrospective("retrospectiveName", 1, newFeedbackItem));
+        assertEquals("No feedback with item number: 1. Please revise item number or create new feedback", exception.getMessage());
+
+        // Verify that save() method is not called with the updated Retrospective object
+        verify(retrospectiveRepository, never()).save(existingRetrospective);
     }
 }

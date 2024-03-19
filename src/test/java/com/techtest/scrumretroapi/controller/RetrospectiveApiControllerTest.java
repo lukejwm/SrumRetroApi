@@ -70,7 +70,6 @@ public class RetrospectiveApiControllerTest {
 
     @Test
     void testGetAllRetrospectivesFail() {
-        // FIXME: call the pagination method BUT ensure it comes back with nothing!
         // Mocking the service method to return an empty Page
         Page<Retrospective> page = new PageImpl<>(Collections.emptyList());
         when(retrospectiveService.getAllRetrospectives(any(Pageable.class))).thenReturn(page);
@@ -135,37 +134,49 @@ public class RetrospectiveApiControllerTest {
         }
     }
 
-    // TODO: add test case for when exception is thrown
-
     @Test
     public void testAddFeedbackToRetrospective() {
         // Mock the service method
         FeedbackItem feedbackItem = new FeedbackItem();
-        doNothing().when(retrospectiveService).createNewFeedbackForRetrospective(anyString(), eq(feedbackItem));
 
-        // Call the controller method
-        ResponseEntity<Void> result = retrospectiveApiController.addFeedbackToRetrospective("name", feedbackItem);
+        try {
+            doNothing().when(retrospectiveService).createNewFeedbackForRetrospective(anyString(), eq(feedbackItem));
 
-        // Verify the service method was called
-        verify(retrospectiveService, times(1)).createNewFeedbackForRetrospective("name", feedbackItem);
+            // Call the controller method
+            ResponseEntity<Void> result = retrospectiveApiController.addFeedbackToRetrospective("name", feedbackItem);
 
-        // Verify the result
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+            // Verify the service method was called
+            verify(retrospectiveService, times(1)).createNewFeedbackForRetrospective("name", feedbackItem);
+
+            // Verify the result
+            assertEquals(HttpStatus.OK, result.getStatusCode());
+        } catch (Exception exp) {
+            // Display the error message and fail the test
+            System.err.println("Exception thrown: " + exp.getMessage());
+            fail();
+        }
     }
 
     @Test
     public void testUpdateFeedbackItem() {
         // Mock the service method
         FeedbackItem feedbackItem = new FeedbackItem();
-        doNothing().when(retrospectiveService).updateFeedbackForRetrospective(anyString(), anyInt(), eq(feedbackItem));
 
-        // Call the controller method
-        ResponseEntity<Void> result = retrospectiveApiController.updateFeedbackItem("name", 1, feedbackItem);
+        try {
+            doNothing().when(retrospectiveService).updateFeedbackForRetrospective(anyString(), anyInt(), eq(feedbackItem));
 
-        // Verify the service method was called
-        verify(retrospectiveService, times(1)).updateFeedbackForRetrospective("name", 1, feedbackItem);
+            // Call the controller method
+            ResponseEntity<Void> result = retrospectiveApiController.updateFeedbackItem("name", 1, feedbackItem);
 
-        // Verify the result
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+            // Verify the service method was called
+            verify(retrospectiveService, times(1)).updateFeedbackForRetrospective("name", 1, feedbackItem);
+
+            // Verify the result
+            assertEquals(HttpStatus.OK, result.getStatusCode());
+        } catch (Exception exp) {
+            // Display the error message and fail the test
+            System.err.println("Exception thrown: " + exp.getMessage());
+            fail();
+        }
     }
 }
